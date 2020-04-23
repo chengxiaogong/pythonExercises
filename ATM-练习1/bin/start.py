@@ -35,11 +35,11 @@ def transferAccounts(srcAccount, destAccount, commodityPrice):
     """
     serviceCharge = 0.05  # 手续费5%
     price = commodityPrice + (commodityPrice * serviceCharge)
-    if srcAccount['balance'] >= price:
+    if srcAccount['account_balance'] >= price:
         # 从alex账户中扣钱,包含手续费
-        srcAccount['balance'] -=  price
+        srcAccount['account_balance'] -= price
         # 将钱转到 tesla_company 账户中,但是不包含手续费,手续费是由银行收取了
-        destAccount['balance'] += commodityPrice
+        destAccount['account_balance'] += commodityPrice
         print('alex 购买了一台特斯拉,手续费和特斯拉合计扣除: %d, 特斯拉公司收到转账: %d, 所需手续费: %d'
               % (price, commodityPrice, commodityPrice * serviceCharge))
         return updateFileDate(userFilePath, srcAccount), updateFileDate(companyFilePath, destAccount)
@@ -82,7 +82,8 @@ if __name__ == '__main__':
                 company_info = loadFileData(companyFilePath)
                 if choice_id == 1:
                     # 查看余额和信用额度
-                    print('username: %s, balance: %d, credit limit: %d' %(username, users_info['balance'], users_info['credit_limit']))
+                    print('username: %s, balance: %d, credit limit: %d'
+                          % (username, users_info['account_balance'], users_info['credit_account']))
                 elif choice_id == 2:
                     # 转账
                     transferAccounts(users_info, company_info, 950000)
