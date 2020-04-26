@@ -10,7 +10,7 @@ import hashlib
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from core import fileManager
-
+from core import logger
 
 def encryptionProcessing(string):
     # md5加密
@@ -55,6 +55,7 @@ def login(functionName):
                                 # 更改用户的登录状态
                                 account_info['login_status'] = True
                                 print('%s user login success!!!' % username)
+                                logger.logger().info('login      %s user login success' % username)
                                 flag = False
                             else:
                                 print('账号已过期')
@@ -63,6 +64,7 @@ def login(functionName):
                             print('%s user login failed' % username)
                             if login_count == 3:
                                 print('三次登录失败,锁定该账户', username)
+                                logger.logger().error('login       %s user lock' % username)
                                 account_info['status'] = 1
                                 flag = False
                             login_count += 1

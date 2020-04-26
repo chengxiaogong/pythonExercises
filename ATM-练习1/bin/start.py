@@ -9,6 +9,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from core import fileManager
 from core import auth
+from core import logger
+
 """
 需求1:
 最近alex买了个Tesla Model S，通过转账的形式，并且支付了5%的手续费，tesla价格为95万。
@@ -58,6 +60,9 @@ def transferAccounts(alexBalance, teslaMoney):
                         tesla_account['account_balance'] += teslaMoney
                         print('%s 特斯拉和税后合计扣除: %d, 账户余额: %d , 特斯拉公司收到转账: %d, 所需手续费: %d'
                               % (username, teslaPrice, alex_account['account_balance'] , teslaMoney, teslaMoney * 0.05))
+                        msg = "transfer      transfered to  [tesla_company]  with amount RMB950000, intrest is RMB%d." \
+                              % (alex_account['account_balance'])
+                        logger.logger().info(msg)
                         # 将变更后的数据写入到文件中
                         return fileManager.updateFileDate(userFilePath, alex_account),\
                                fileManager.updateFileDate(teslaFilePath, tesla_account)

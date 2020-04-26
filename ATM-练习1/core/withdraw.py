@@ -13,6 +13,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 from core import fileManager
 from core import auth
+from core import logger
 
 
 @auth.login
@@ -54,6 +55,9 @@ def withdrawalStart(balance, creditLimit, withdrawalAmount):
                         alex_account['creditLimit'] -= amountSum
                         print('账户余额: %d, 信用卡剩余可用额度: %d, 提现%d 到账户中'
                               % (alex_account['account_balance'], alex_account['creditLimit'], withdrawalAmount))
+                        msg = "withdraw      withdraw cash RMB%d, intrest is RMB%d."\
+                              % (withdrawalAmount, withdrawalAmount * 0.05)
+                        logger.logger().info(msg)
                         # 更改账户信息
                         return fileManager.updateFileDate(userFilePath, alex_account)
                     else:
