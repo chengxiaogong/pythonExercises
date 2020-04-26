@@ -12,6 +12,7 @@ import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
+from bin import start
 
 def loadFileData(filePath):
     # 加载文件中的数据
@@ -30,6 +31,7 @@ def updateFileDate(filePath, content):
         return json.dump(content, fileObj)
 
 
+@start.login
 def withdrawalStart(balance, creditLimit, withdrawalAmount):
     """
     提现
@@ -45,7 +47,7 @@ def withdrawalStart(balance, creditLimit, withdrawalAmount):
     rootPath = r'%s\account' % BASE_DIR
     userFilePath = r'%s\%s.json' % (rootPath, username)  # alex 账号文件
     # 写入账户余额和信用卡额度
-    updateFileDate(userFilePath, {'balance': balance, 'creditLimit': creditLimit})
+    updateFileDate(userFilePath, {'account_balance': balance, 'creditLimit': creditLimit})
     while True:
         print(msg)
         choice = input("input choice: ")
