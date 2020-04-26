@@ -8,30 +8,14 @@
 """
 import sys
 import os
-import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from bin import start
-
-def loadFileData(filePath):
-    # 加载文件中的数据
-    with open(filePath, 'r') as fileObj:
-        return json.load(fileObj)
+from core import fileManager
+from core import auth
 
 
-def updateFileDate(filePath, content):
-    """
-    修改文件中的数据
-    :param filePath: 文件名
-    :param content: 内容
-    :return:
-    """
-    with open(filePath, 'w') as fileObj:
-        return json.dump(content, fileObj)
-
-
-@start.login
+@auth.login
 def withdrawalStart(balance, creditLimit, withdrawalAmount):
     """
     提现
@@ -47,7 +31,7 @@ def withdrawalStart(balance, creditLimit, withdrawalAmount):
     rootPath = r'%s\account' % BASE_DIR
     userFilePath = r'%s\%s.json' % (rootPath, username)  # alex 账号文件
     # 写入账户余额和信用卡额度
-    updateFileDate(userFilePath, {'account_balance': balance, 'creditLimit': creditLimit})
+    fileManager.updateFileDate(userFilePath, {'account_balance': balance, 'creditLimit': creditLimit})
     while True:
         print(msg)
         choice = input("input choice: ")
@@ -55,7 +39,7 @@ def withdrawalStart(balance, creditLimit, withdrawalAmount):
             choice_id = int(choice)
             if 2 >= choice_id > 0:
                 # 读取文件中的数据
-                alex_account = loadFileData(userFilePath)
+                alex_account = fileManager.loadFileData(userFilePath)
                 if choice_id == 1:
                     # 查看余额和信用额度
                     print('username: %s, account_balance: %d, credit Limit: %d'
@@ -71,7 +55,7 @@ def withdrawalStart(balance, creditLimit, withdrawalAmount):
                         print('账户余额: %d, 信用卡剩余可用额度: %d, 提现%d 到账户中'
                               % (alex_account['account_balance'], alex_account['creditLimit'], withdrawalAmount))
                         # 更改账户信息
-                        return updateFileDate(userFilePath, alex_account)
+                        return fileManager.updateFileDate(userFilePath, alex_account)
                     else:
                         print('信用卡额度不够')
             else:
