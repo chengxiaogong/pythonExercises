@@ -139,6 +139,7 @@ def transferAccounts(alexBalance, teslaMoney):
                         tesla_account['account_balance'] += teslaMoney
                         print('%s 特斯拉和税后合计扣除: %d, 特斯拉公司收到转账: %d, 所需手续费: %d'
                               % (username, teslaPrice, teslaMoney, teslaMoney * 0.05))
+                        # 将变更后的数据写入到文件中
                         return updateFileDate(userFilePath, alex_account), updateFileDate(teslaFilePath, tesla_account)
                     else:
                         print('余额不够,还差%d' % (teslaPrice - alex_account['account_balance']))
