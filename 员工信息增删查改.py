@@ -84,27 +84,6 @@ def filterData(condition, fileData):
     return result
 
 
-def select(fieldString, filterFunction, expression, fileData):
-    """
-    查询SQL
-    :param fieldString: 需要查询哪些字段
-    :param filterFunction: 调用过滤函数
-    :param expression: 查询表达式
-    :param fileData: 文件中的数据
-    :return:
-    """
-    data = filterFunction(expression, fileData)
-    if fieldString == '*':
-        for item in data:
-            print(list(item.values()))
-    else:
-        field = fieldString.split(',')
-        for item in data:
-            for i in range(0, len(field)):
-                print(item[field[i]], end=' ')
-            print('')
-
-
 def checkPhoneExists(phone, phone_list):
     """
     检查手机号是否已经存在
@@ -147,19 +126,58 @@ def insert(sql, fileData):
         return result
 
 
+def delete(filterFunction, expression, fileData):
+    """
+    删除SQL
+    :param filterFunction: 调用过滤函数
+    :param expression: 查询表达式
+    :param fileData: 文件中的数据
+    :return:
+    """
+    data = filterFunction(expression, fileData)
+    print(data)
+    if len(data) == 0:
+        print('data not exists.')
+    else:
+        print('delete sql...')
+
+
+def select(fieldString, filterFunction, expression, fileData):
+    """
+    查询SQL
+    :param fieldString: 需要查询哪些字段
+    :param filterFunction: 调用过滤函数
+    :param expression: 查询表达式
+    :param fileData: 文件中的数据
+    :return:
+    """
+    data = filterFunction(expression, fileData)
+    if fieldString == '*':
+        for item in data:
+            print(list(item.values()))
+    else:
+        # 只显示特定几个字段的查询结果
+        field = fieldString.split(',')
+        for item in data:
+            for i in range(0, len(field)):
+                print(item[field[i]], end=' ')
+            print('')
+
+
 def main(sql):
+    seq = 'where' if sql.find('where') != -1 else 'WHERE'
     result = loadFileData()
     if sql.startswith('find'):
-        seq = 'where' if sql.find('where') != -1 else 'WHERE'
         ret = separate(sql, seq)
         col = separate(ret[0])[1]
         condition = separate(ret[1], ',')
-        print('col: ', col)
         select(col, filterData, condition[0], result)
     elif sql.startswith('add'):
         updateFileData(insert(sql, result))
     elif sql.startswith('del'):
-        print('删除')
+        ret = separate(sql, seq)
+        condition = separate(ret[1], ',')
+        delete(filterData, condition[0], result)
     elif sql.startswith('update'):
         print('修改')
     else:
