@@ -135,11 +135,15 @@ def delete(filterFunction, expression, fileData):
     :return:
     """
     data = filterFunction(expression, fileData)
-    print(data)
     if len(data) == 0:
         print('data not exists.')
     else:
-        print('delete sql...')
+        userId = data[0]['staff_id']
+        for k, v in enumerate(fileData):
+            if v['staff_id'] == userId:
+                fileData.pop(k)
+                print('delete success')
+        return fileData
 
 
 def select(fieldString, filterFunction, expression, fileData):
@@ -177,7 +181,7 @@ def main(sql):
     elif sql.startswith('del'):
         ret = separate(sql, seq)
         condition = separate(ret[1], ',')
-        delete(filterData, condition[0], result)
+        updateFileData(delete(filterData, condition[0], result))
     elif sql.startswith('update'):
         print('修改')
     else:
