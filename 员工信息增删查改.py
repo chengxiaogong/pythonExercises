@@ -7,7 +7,7 @@ def loadFileData():
     # 加载文件数据
     users = []
     title = ['staff_id', 'name', 'age', 'phone', 'dept', 'enroll_date']
-    filename = "./files/staff_data.txt"
+    filename = "./files/staff_table.txt"
     with open(filename, 'r', encoding='utf-8') as fileObj:
         for i in fileObj:
             line = i.strip('\n').split(',')
@@ -17,7 +17,7 @@ def loadFileData():
 
 def updateFileData(users):
     if users:
-        f = open('./files/staff_data.txt', 'w', encoding='utf-8')
+        f = open('./files/staff_table.txt', 'w', encoding='utf-8')
         for item in users:
             content = ','.join(list(item.values()))
             f.write(content + '\n')
@@ -35,111 +35,157 @@ def separate(*args):
 
 
 def splitExpression(string, seq):
-    # 拆分表达式
+    """
+    拆分表达式
+    :param string: 表达式字符串
+    :param seq: 表达式符号
+    :return:
+    """
     ret = separate(string, seq)
     left = ret[0].replace(' ', '')
     right = ret[1]
-    return left, right
+    value = right.replace(' ', '').strip('"')
+    return left, right, value
 
 
-def select(condition, col, fileData):
+def filterData(condition, fileData):
     """
-    查询SQL
+    过滤数据
     :param condition: 条件表达式, age >= 22
-    :param col: 需要查询哪些字段
     :param fileData: 文件中的数据
     :return:
     """
+    result = []
     if condition.count('>=') >= 1:
         seqName = '>='
-        left, right = splitExpression(condition, seqName)
-        value = right.replace(' ', '').strip('"')
-        if col == '*':
-            for item in fileData:
-                if item[left] >= value:
-                    print(list(item.values()))
-        else:
-            field_list = col.split(',')
-            for item in fileData:
-                if item[left] >= value:
-                    for i in range(0, len(field_list)):
-                        print(item[field_list[i]], end=' ')
-                    print('')
+        left, right, value = splitExpression(condition, seqName)
+        result = [ item for item in fileData if item[left] >= value ]
     elif condition.count('<=') >= 1:
         seqName = '<='
-        left, right = splitExpression(condition, seqName)
-        value = right.replace(' ', '').strip('"')
-        if col == '*':
-            for item in fileData:
-                if item[left] <= value:
-                    print(list(item.values()))
-        else:
-            field_list = col.split(',')
-            for item in fileData:
-                if item[left] <= value:
-                    for i in range(0, len(field_list)):
-                        print(item[field_list[i]], end=' ')
-                    print('')
+        left, right, value = splitExpression(condition, seqName)
+        result = [item for item in fileData if item[left] <= value]
     elif condition.count('=') >= 1:
         seqName = '='
-        left, right = splitExpression(condition, seqName)
-        value = right.replace(' ', '').strip('"')
-        if col == '*':
-            for item in fileData:
-                if item[left] == value:
-                    print(list(item.values()))
-        else:
-            field_list = col.split(',')
-            for item in fileData:
-                if item[left] == value:
-                    for i in range(0, len(field_list)):
-                        print(item[field_list[i]], end=' ')
-                    print('')
+        left, right, value = splitExpression(condition, seqName)
+        result = [item for item in fileData if item[left] == value]
     elif condition.count('>') >= 1:
         seqName = '>'
-        left, right = splitExpression(condition, seqName)
-        value = right.replace(' ', '').strip('"')
-        if col == '*':
-            for item in fileData:
-                if item[left] > value:
-                    print(list(item.values()))
-        else:
-            field_list = col.split(',')
-            for item in fileData:
-                if item[left] > value:
-                    for i in range(0, len(field_list)):
-                        print(item[field_list[i]], end=' ')
-                    print('')
+        left, right, value = splitExpression(condition, seqName)
+        result = [item for item in fileData if item[left] > value]
     elif condition.count('<') >= 1:
         seqName = '<'
-        left, right = splitExpression(condition, seqName)
-        value = right.replace(' ', '').strip('"')
-        if col == '*':
-            for item in fileData:
-                if item[left] < value:
-                    print(list(item.values()))
-        else:
-            field_list = col.split(',')
-            for item in fileData:
-                if item[left] < value:
-                    for i in range(0, len(field_list)):
-                        print(item[field_list[i]], end=' ')
-                    print('')
+        left, right, value = splitExpression(condition, seqName)
+        result = [item for item in fileData if item[left] < value]
     elif condition.count('like') >= 1:
         seqName = 'like'
-        left, right = splitExpression(condition, seqName)
-        value = right.replace(' ', '').strip('"')
-        if col == '*':
-            for item in fileData:
-                if value in item[left]:
-                    print(list(item.values()))
-        else:
-            field_list = col.split(',')
-            for item in fileData:
-                if value in item[left]:
-                    for i in range(0, len(field_list)):
-                        print(item[field_list[i]], end=' ')
-                    print('')
+        left, right, value = splitExpression(condition, seqName)
+        result = [item for item in fileData if value in item[left]]
+    return result
+
+
+def select(fieldString, filterFunction, expression, fileData):
+    """
+    查询SQL
+    :param fieldString: 需要查询哪些字段
+    :param filterFunction: 调用过滤函数
+    :param expression: 查询表达式
+    :param fileData: 文件中的数据
+    :return:
+    """
+    print(fieldString, expression, fileData)
+    # result = []
+    # if condition.count('>=') >= 1:
+    #     seqName = '>='
+    #     left, right = splitExpression(condition, seqName)
+    #     value = right.replace(' ', '').strip('"')
+    #     result = [ list(item.values()) for item in fileData if item[left] >= value ]
+    #     if col == '*':
+    #         for item in fileData:
+    #             if item[left] >= value:
+    #                 print(list(item.values()))
+    #     else:
+    #         field_list = col.split(',')
+    #         for item in fileData:
+    #             if item[left] >= value:
+    #                 for i in range(0, len(field_list)):
+    #                     print(item[field_list[i]], end=' ')
+    #                 print('')
+    # elif condition.count('<=') >= 1:
+    #     seqName = '<='
+    #     left, right = splitExpression(condition, seqName)
+    #     value = right.replace(' ', '').strip('"')
+    #     if col == '*':
+    #         for item in fileData:
+    #             if item[left] <= value:
+    #                 print(list(item.values()))
+    #     else:
+    #         field_list = col.split(',')
+    #         for item in fileData:
+    #             if item[left] <= value:
+    #                 for i in range(0, len(field_list)):
+    #                     print(item[field_list[i]], end=' ')
+    #                 print('')
+    # elif condition.count('=') >= 1:
+    #     seqName = '='
+    #     left, right = splitExpression(condition, seqName)
+    #     value = right.replace(' ', '').strip('"')
+    #     if col == '*':
+    #         for item in fileData:
+    #             if item[left] == value:
+    #                 print(list(item.values()))
+    #     else:
+    #         field_list = col.split(',')
+    #         for item in fileData:
+    #             if item[left] == value:
+    #                 for i in range(0, len(field_list)):
+    #                     print(item[field_list[i]], end=' ')
+    #                 print('')
+    # elif condition.count('>') >= 1:
+    #     seqName = '>'
+    #     left, right = splitExpression(condition, seqName)
+    #     value = right.replace(' ', '').strip('"')
+    #     if col == '*':
+    #         for item in fileData:
+    #             if item[left] > value:
+    #                 print(list(item.values()))
+    #     else:
+    #         field_list = col.split(',')
+    #         for item in fileData:
+    #             if item[left] > value:
+    #                 for i in range(0, len(field_list)):
+    #                     print(item[field_list[i]], end=' ')
+    #                 print('')
+    # elif condition.count('<') >= 1:
+    #     seqName = '<'
+    #     left, right = splitExpression(condition, seqName)
+    #     value = right.replace(' ', '').strip('"')
+    #     if col == '*':
+    #         for item in fileData:
+    #             if item[left] < value:
+    #                 print(list(item.values()))
+    #     else:
+    #         field_list = col.split(',')
+    #         for item in fileData:
+    #             if item[left] < value:
+    #                 for i in range(0, len(field_list)):
+    #                     print(item[field_list[i]], end=' ')
+    #                 print('')
+    # elif condition.count('like') >= 1:
+    #     seqName = 'like'
+    #     left, right = splitExpression(condition, seqName)
+    #     value = right.replace(' ', '').strip('"')
+    #     if col == '*':
+    #         for item in fileData:
+    #             if value in item[left]:
+    #                 print(list(item.values()))
+    #     else:
+    #         field_list = col.split(',')
+    #         for item in fileData:
+    #             if value in item[left]:
+    #                 for i in range(0, len(field_list)):
+    #                     print(item[field_list[i]], end=' ')
+    #                 print('')
+
 
 def checkPhoneExists(phone, phone_list):
     """
@@ -191,7 +237,7 @@ def main(sql):
         col = separate(ret[0])[1]
         condition = separate(ret[1], ',')
         print('col: ', col)
-        select(condition[0], col, result)
+        select(col, filterData , condition[0], result)
     elif sql.startswith('add'):
         updateFileData(insert(sql, result))
     elif sql.startswith('del'):
