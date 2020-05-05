@@ -106,14 +106,14 @@ def insert(sql, fileData):
     :param fileData: 文件中的数据
     :return:
     """
-    result = loadFileData()
     name = ' '.join(sql.split(',')[0].split()[2:])
     age, phone, dept, enroll_date = sql.split(',')[1:]
     if checkPhoneExists(phone, fileData):
         print('phone %s exists' % phone)
     else:
-        new_id = str(int(result[-1]['staff_id']) + 1)
-        result.append(
+        # staff_id 自增
+        new_id = str(int(fileData[-1]['staff_id']) + 1)
+        fileData.append(
             {
                 'staff_id': new_id,
                 'name': name,
@@ -123,7 +123,7 @@ def insert(sql, fileData):
                 'enroll_date': enroll_date
             }
         )
-        return result
+        return fileData
 
 
 def delete(filterFunction, expression, fileData):
@@ -141,9 +141,39 @@ def delete(filterFunction, expression, fileData):
         userId = data[0]['staff_id']
         for k, v in enumerate(fileData):
             if v['staff_id'] == userId:
-                fileData.pop(k)
-                print('delete success')
+                print('user %s delete success' % fileData.pop(k))
         return fileData
+
+
+def update(filterFunction, expression, fields, fileData):
+    """
+    修改SQL
+    :param filterFunction: 调用过滤函数
+    :param expression: 查询表达式
+    :param fields: 需要修改的字段列表
+    :param fileData: 文件中的数据
+    :return:
+    """
+    dic = {}
+    if ',' in fields[1]:
+        for item in separate(fields[1], ','):
+            result = separate(item, '=')
+            name = result[0].strip(' ').strip('"')
+            value = result[1].strip(' ').strip('"')
+            dic[name] = value
+    else:
+        result = separate(fields[1], '=')
+        name = result[0].strip(' ').strip('"')
+        value = result[1].strip(' ').strip('"')
+        dic[name] = value
+    data = filterFunction(expression, fileData)
+    users = [item['staff_id'] for item in data]
+    for item in fileData:
+        if item['staff_id'] in users:
+            for key in dic:
+                if item.get(key):
+                    item[key] = dic[key]
+    return fileData
 
 
 def select(fieldString, filterFunction, expression, fileData):
@@ -171,19 +201,27 @@ def select(fieldString, filterFunction, expression, fileData):
 def main(sql):
     seq = 'where' if sql.find('where') != -1 else 'WHERE'
     result = loadFileData()
-    if sql.startswith('find'):
+    if sql.lower().startswith('find'):
+        # 查询
         ret = separate(sql, seq)
         col = separate(ret[0])[1]
         condition = separate(ret[1], ',')
         select(col, filterData, condition[0], result)
-    elif sql.startswith('add'):
+    elif sql.lower().startswith('add'):
+        # 插入
         updateFileData(insert(sql, result))
-    elif sql.startswith('del'):
+    elif sql.lower().startswith('del'):
+        # 删除
         ret = separate(sql, seq)
         condition = separate(ret[1], ',')
         updateFileData(delete(filterData, condition[0], result))
-    elif sql.startswith('update'):
-        print('修改')
+    elif sql.lower().startswith('update'):
+        # 修改
+        ret = separate(sql, seq)
+        condition = separate(ret[1], ',')
+        seq2 = 'set' if sql.find('set') != -1 else 'SET'
+        fields = separate(ret[0], seq2)
+        updateFileData(update(filterData, condition[0], fields, result))
     else:
         print('invalid error')
 
