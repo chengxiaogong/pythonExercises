@@ -108,7 +108,10 @@ def message(action, msg):
     :param msg: 消息
     :return:
     """
-    print('%s %d rows' % (action, len(msg)))
+    if isinstance(msg, list):
+        print('%s %d rows' % (action, len(msg)))
+    elif isinstance(msg, int):
+        print('%s %d rows' % (action, msg))
 
 
 def insert(sql, fileData):
@@ -170,6 +173,7 @@ def update(filterFunction, expression, fields, fileData):
     :return:
     """
     dic = {}
+    count = 0
     if ',' in fields[1]:
         for item in separate(fields[1], ','):
             result = separate(item, '=')
@@ -187,8 +191,10 @@ def update(filterFunction, expression, fields, fileData):
         if item['staff_id'] in users:
             for key in dic:
                 if item.get(key):
-                    item[key] = dic[key]
-    message('update', data)
+                    if item[key] != dic[key]:
+                        item[key] = dic[key]
+                        count += 1
+    message('update', count)
     return fileData
 
 
