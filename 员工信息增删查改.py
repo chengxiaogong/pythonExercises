@@ -44,9 +44,11 @@ def splitExpression(string, seq):
     """
     ret = separate(string, seq)
     left = ret[0].replace(' ', '')
-    right = ret[1]
-    value = right.replace(' ', '').strip('"')
-    return left, right, value
+    if ret[1].count(' ') >= 2:
+        value = separate(ret[1], '"')[1]
+    else:
+        value = ret[1].replace(' ', '').strip('"')
+    return left, value
 
 
 def filterData(condition, fileData):
@@ -59,27 +61,28 @@ def filterData(condition, fileData):
     result = []
     if condition.count('>=') >= 1:
         seqName = '>='
-        left, right, value = splitExpression(condition, seqName)
+        # left, right, value = splitExpression(condition, seqName)
+        left, value = splitExpression(condition, seqName)
         result = [item for item in fileData if item[left] >= value]
     elif condition.count('<=') >= 1:
         seqName = '<='
-        left, right, value = splitExpression(condition, seqName)
+        left, value = splitExpression(condition, seqName)
         result = [item for item in fileData if item[left] <= value]
     elif condition.count('=') >= 1:
         seqName = '='
-        left, right, value = splitExpression(condition, seqName)
+        left, value = splitExpression(condition, seqName)
         result = [item for item in fileData if item[left] == value]
     elif condition.count('>') >= 1:
         seqName = '>'
-        left, right, value = splitExpression(condition, seqName)
+        left, value = splitExpression(condition, seqName)
         result = [item for item in fileData if item[left] > value]
     elif condition.count('<') >= 1:
         seqName = '<'
-        left, right, value = splitExpression(condition, seqName)
+        left, value = splitExpression(condition, seqName)
         result = [item for item in fileData if item[left] < value]
     elif condition.count('like') >= 1:
         seqName = 'like'
-        left, right, value = splitExpression(condition, seqName)
+        left, value = splitExpression(condition, seqName)
         result = [item for item in fileData if value in item[left]]
     return result
 
@@ -96,6 +99,16 @@ def checkPhoneExists(phone, phone_list):
         return True
     else:
         return False
+
+
+def message(action, msg):
+    """
+    打印信息
+    :param action: 动作
+    :param msg: 消息
+    :return:
+    """
+    print('%s %d rows' % (action, len(msg)))
 
 
 def insert(sql, fileData):
@@ -138,10 +151,12 @@ def delete(filterFunction, expression, fileData):
     if len(data) == 0:
         print('data not exists.')
     else:
-        userId = data[0]['staff_id']
         for k, v in enumerate(fileData):
-            if v['staff_id'] == userId:
-                print('user %s delete success' % fileData.pop(k))
+            for item in data:
+                userId = item['staff_id']
+                if v['staff_id'] == userId:
+                    print('user %s delete success' % fileData.pop(k))
+        message('delete', data)
         return fileData
 
 
@@ -173,6 +188,7 @@ def update(filterFunction, expression, fields, fileData):
             for key in dic:
                 if item.get(key):
                     item[key] = dic[key]
+    message('update', data)
     return fileData
 
 
@@ -196,6 +212,7 @@ def select(fieldString, filterFunction, expression, fileData):
             for i in range(0, len(field)):
                 print(item[field[i]], end=' ')
             print('')
+    message('query', data)
 
 
 def main(sql):
