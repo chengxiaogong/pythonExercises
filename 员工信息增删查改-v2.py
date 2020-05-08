@@ -84,7 +84,18 @@ def splitString(content, separatorCharacterName=None, numberOfSeparations=-1):
         return content.split()
 
 def add(content):
-    pass
+    """
+    新增用户数据
+    :param content: 内容
+    :return:
+    """
+    users = loadFileData()
+    table, content = splitString(content, separatorCharacterName=' ', numberOfSeparations=1)
+    if not os.path.exists('%s.db' % os.path.join(rootPath, table)):
+        print('%s table not exists.' % table)
+    else:
+        data = splitString(content, separatorCharacterName=',')
+        print(data)
 
 
 def delete(content):
