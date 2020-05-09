@@ -203,7 +203,9 @@ def select(content):
                 print(item)
                 count += 1
         else:
-            col = splitString(columnName, separatorCharacterName=',')
+            field_list = splitString(columnName, separatorCharacterName=',')
+            # 筛选出不存在的字段
+            col = [ item for item in field_list if item in tableField]
             for item in data:
                 for field in col:
                     print(item[field], end=' ')
