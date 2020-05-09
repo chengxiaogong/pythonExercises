@@ -98,6 +98,27 @@ def splitString(content, separatorCharacterName=None, numberOfSeparations=-1):
         return content.split()
 
 
+def filterFunction(fieldKey, fieldValue, symbol, users):
+    """
+    过滤器函数
+    :param fieldKey: 字段名称
+    :param fieldValue: 字段值
+    :param symbol: 符号
+    :param users: 用户数据
+    :return:
+    """
+    fieldValue = fieldValue.strip('"')
+    field_symbol_compare = {
+        ">": [item for item in users if item[fieldKey] > fieldValue],
+        "<": [item for item in users if item[fieldKey] < fieldValue],
+        "=": [item for item in users if item[fieldKey] == fieldValue],
+        ">=": [item for item in users if item[fieldKey] >= fieldValue],
+        "<=": [item for item in users if item[fieldKey] <= fieldValue],
+        "like": [item for item in users if fieldValue in item[fieldKey]],
+    }
+    return field_symbol_compare.get(symbol)
+
+
 def checkPhoneExists(phone, users):
     """
     检查手机号是否已经存在
@@ -146,15 +167,51 @@ def add(content):
 
 
 def delete(content):
-    pass
+    """
+    删除用户数据
+    :param content: 内容
+    :return:
+    """
+    users = loadFileData()
+    print(content)
 
 
 def update(content):
-    pass
+    """
+    更新数据
+    :param content: 内容
+    :return:
+    """
+    users = loadFileData()
+    print(content)
 
 
 def select(content):
-    pass
+    """
+    查询
+    :param content: 内容
+    :return:
+    """
+    users = loadFileData()
+    result = splitString(content, separatorCharacterName=' ')
+    if len(result) == 7 and result[1].lower() == 'from' and result[3].lower() == 'where':
+        columnName, tableName, fieldKey, fieldValue = result[::2]
+        data = filterFunction(fieldKey, fieldValue, result[5], users)
+        count = 0  # 计数器
+        if columnName == '*':
+            for item in data:
+                print(item)
+                count += 1
+        else:
+            col = splitString(columnName, separatorCharacterName=',')
+            for item in data:
+                for field in col:
+                    print(item[field], end=' ')
+                print()
+                count += 1
+        print('查询出来的条数: %d' % count)
+    else:
+        print('sql error')
 
 
 def main(sql):
@@ -162,17 +219,17 @@ def main(sql):
     action = sqlCommand.lower()
     commandType = {
         'add': add,
-        'delete': delete,
+        'del': delete,
         'update': update,
-        'select': select
+        'find': select
     }
     if action == 'add':
         commandType[action](sqlContent)
-    elif action == 'delete':
+    elif action == 'del':
         commandType[action](sqlContent)
     elif action == 'update':
         commandType[action](sqlContent)
-    elif action == 'select':
+    elif action == 'find':
         commandType[action](sqlContent)
     else:
         print('invalid error')
