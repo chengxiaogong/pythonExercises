@@ -139,6 +139,19 @@ def checkPhoneExists(phone, users):
     return checkStatus
 
 
+def checkTableExists(tableName):
+    """
+    效验表是否存在
+    :param tableName: 表的名称
+    :return bool:
+    """
+    if not os.path.exists('%s.db' % os.path.join(rootPath, tableName)):
+        print('%s table not exists.' % tableName)
+        return False
+    else:
+        return True
+
+
 def add(content):
     """
     新增用户数据
@@ -147,10 +160,7 @@ def add(content):
     """
     users = loadFileData()
     table, content = splitString(content, separatorCharacterName=' ', numberOfSeparations=1)
-    # 效验表是否存在
-    if not os.path.exists('%s.db' % os.path.join(rootPath, table)):
-        print('%s table not exists.' % table)
-    else:
+    if checkTableExists(table):
         data = splitString(content, separatorCharacterName=',')
         if len(data) + 1 == len(users[0]):
             phone = data[2]
@@ -196,22 +206,23 @@ def select(content):
     result = splitString(content, separatorCharacterName=' ')
     if len(result) == 7 and result[1].lower() == 'from' and result[3].lower() == 'where':
         columnName, tableName, fieldKey, fieldValue = result[::2]
-        data = filterFunction(fieldKey, fieldValue, result[5], users)
-        count = 0  # 计数器
-        if columnName == '*':
-            for item in data:
-                print(item)
-                count += 1
-        else:
-            field_list = splitString(columnName, separatorCharacterName=',')
-            # 筛选出不存在的字段
-            col = [ item for item in field_list if item in tableField]
-            for item in data:
-                for field in col:
-                    print(item[field], end=' ')
-                print()
-                count += 1
-        print('查询出来的条数: %d' % count)
+        if checkTableExists(tableName):
+            data = filterFunction(fieldKey, fieldValue, result[5], users)
+            count = 0  # 计数器
+            if columnName == '*':
+                for item in data:
+                    print(item)
+                    count += 1
+            else:
+                field_list = splitString(columnName, separatorCharacterName=',')
+                # 筛选出不存在的字段
+                col = [ item for item in field_list if item in tableField]
+                for item in data:
+                    for field in col:
+                        print(item[field], end=' ')
+                    print()
+                    count += 1
+            print('查询出来的条数: %d' % count)
     else:
         print('sql error')
 
