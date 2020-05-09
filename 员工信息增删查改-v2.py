@@ -70,6 +70,20 @@ def loadFileData():
     return users
 
 
+def storageData(users):
+    """
+    存储数据
+    :param users: 将修改后的数据重新写到文件中
+    :return:
+    """
+    if users:
+        f = open(filePath, 'w', encoding='utf-8')
+        for item in users:
+            content = ','.join(list(item.values()))
+            f.write(content + '\n')
+        f.close()
+
+
 def splitString(content, separatorCharacterName=None, numberOfSeparations=-1):
     """
     分隔字符串
@@ -83,6 +97,27 @@ def splitString(content, separatorCharacterName=None, numberOfSeparations=-1):
     else:
         return content.split()
 
+
+def checkPhoneExists(phone, users):
+    """
+    检查手机号是否已经存在
+    :param phone: 用户输入的手机号
+    :param users: 表中的用户数据
+    :return bool: False 表示手机号已经存在, True 表示手机号不存在
+    """
+    num, checkStatus = len(phone), True  # 初始化变量状态
+    if num != 11:
+        print('%s Illegal mobile number !!!' % phone)
+        checkStatus = False
+    else:
+        # 效验手机号是否已经存在
+        result = [item['phone'] for item in users]
+        if phone in result:
+            print('%s phone exists' % phone)
+            checkStatus = False
+    return checkStatus
+
+
 def add(content):
     """
     新增用户数据
@@ -91,11 +126,23 @@ def add(content):
     """
     users = loadFileData()
     table, content = splitString(content, separatorCharacterName=' ', numberOfSeparations=1)
+    # 效验表是否存在
     if not os.path.exists('%s.db' % os.path.join(rootPath, table)):
         print('%s table not exists.' % table)
     else:
         data = splitString(content, separatorCharacterName=',')
-        print(data)
+        if len(data) + 1 == len(users[0]):
+            phone = data[2]
+            # 效验手机号是否已经存在
+            if checkPhoneExists(phone, users):
+                # 用户ID 自增
+                staffId = str(len(users) + 1)
+                data.insert(0, staffId)
+                sqlContent = dict(zip(tableField, data))
+                users.append(sqlContent)
+                return storageData(users)
+        else:
+            print('sql error')
 
 
 def delete(content):
@@ -156,5 +203,5 @@ if __name__ == '__main__':
             # 形成数据框,并打印出来
             print(tabulate([tableField] + users))
             print('共计 %d 个人员' % len(users))
-        else:
+        elif choice:
             main(choice)
