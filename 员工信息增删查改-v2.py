@@ -19,6 +19,7 @@
 """
 
 import os
+import re
 from tabulate import tabulate
 
 
@@ -52,7 +53,7 @@ def help():
 2.可创建新员工纪录，以phone做唯一键(即不允许表里有手机号重复的情况)，staff_id需自增
     语法: add staff_table Alex Li,18,134435344,IT,2015-10-29  
 3.可删除指定员工信息纪录，输入员工id，即可删除
-    语法: del from staff_tables where  id=3
+    语法: del from staff_tables where  staff_id=3
 4.可修改员工信息，语法如下:
     UPDATE staff_table SET dept = "Market" WHERE  dept = "IT" 把所有dept=IT的纪录的dept改成Market
     UPDATE staff_table SET age = 25 WHERE  name = "Alex Li"  把name=Alex Li的纪录的年龄改成25"""
@@ -105,18 +106,22 @@ def filterFunction(fieldKey, fieldValue, symbol, users):
     :param fieldValue: 字段值
     :param symbol: 符号
     :param users: 用户数据
-    :return:
+    :return list:
     """
-    fieldValue = fieldValue.strip('"')
-    field_symbol_compare = {
-        ">": [item for item in users if item[fieldKey] > fieldValue],
-        "<": [item for item in users if item[fieldKey] < fieldValue],
-        "=": [item for item in users if item[fieldKey] == fieldValue],
-        ">=": [item for item in users if item[fieldKey] >= fieldValue],
-        "<=": [item for item in users if item[fieldKey] <= fieldValue],
-        "like": [item for item in users if fieldValue in item[fieldKey]],
-    }
-    return field_symbol_compare.get(symbol)
+    if fieldKey not in tableField:
+        print('table field %s not exists' % fieldKey)
+        return []
+    else:
+        fieldValue = fieldValue.strip('"')
+        field_symbol_compare = {
+            ">": [item for item in users if item[fieldKey] > fieldValue],
+            "<": [item for item in users if item[fieldKey] < fieldValue],
+            "=": [item for item in users if item[fieldKey] == fieldValue],
+            ">=": [item for item in users if item[fieldKey] >= fieldValue],
+            "<=": [item for item in users if item[fieldKey] <= fieldValue],
+            "like": [item for item in users if fieldValue in item[fieldKey]],
+        }
+        return field_symbol_compare.get(symbol)
 
 
 def checkPhoneExists(phone, users):
@@ -152,6 +157,17 @@ def checkTableExists(tableName):
         return True
 
 
+def removeSpace(content):
+    """
+    移除列表中的空元素
+    :param content: 内容
+    :return:
+    """
+    while '' in content:
+        content.remove('')
+    return content
+
+
 def add(content):
     """
     新增用户数据
@@ -182,8 +198,42 @@ def delete(content):
     :param content: 内容
     :return:
     """
+    fieldKey, fieldValue, symbol, count = None, None, None, 0  # 初始化变量
     users = loadFileData()
-    print(content)
+    result = splitString(content, separatorCharacterName=' ')
+    content = removeSpace(result)
+    if content[0].lower() == 'from' and content[2].lower() == 'where':
+        condition = content[content.index('where')+1:]  # ['from', 'staff_tables', 'where', 'staff_id=3']
+        if len(condition) == 1:
+            pattern = '(?P<fieldKey>[A-Za-z].*)(?P<symbol>\>|<|=|<=|\>=|like)(?P<fieldValue>\w.*)'
+            matchingObject = re.search(pattern, condition[0])  # staff_id=3
+            if matchingObject:
+                fieldKey = matchingObject['fieldKey']
+                symbol = matchingObject['symbol']
+                fieldValue = matchingObject['fieldValue']
+            else:
+                print('matching condition error')
+        elif len(condition) == 3:
+            fieldKey, symbol, fieldValue = condition
+        else:
+            print('sql syntax error')
+    else:
+        print('sql syntax error')
+
+    if fieldKey and fieldValue and symbol:
+        data = filterFunction(fieldKey, fieldValue, symbol, users)
+        if len(data) != 0:
+            for k, v in enumerate(users):
+                for j in data:
+                    deleteUserId = j['staff_id']
+                    userId = v['staff_id']
+                    if userId == deleteUserId:
+                        print('delete %s user ' % v['name'])
+                        del users[k]
+                        count += 1
+
+    print('删除的用户数: %d' % count)
+    return storageData(users)
 
 
 def update(content):
