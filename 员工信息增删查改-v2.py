@@ -232,9 +232,8 @@ def delete(content):
                         print('delete %s user ' % v['name'])
                         del users[k]
                         count += 1
-
-    print('删除的用户数: %d' % count)
-    return storageData(users)
+        print('删除的用户数: %d' % count)
+        return storageData(users)
 
 
 def update(content):
