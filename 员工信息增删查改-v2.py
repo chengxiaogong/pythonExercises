@@ -157,9 +157,9 @@ def checkTableExists(tableName):
         return True
 
 
-def removeSpace(content):
+def deleteEmptyElement(content):
     """
-    移除列表中的空元素
+    删除列表中的空元素
     :param content: 内容
     :return:
     """
@@ -201,11 +201,12 @@ def delete(content):
     fieldKey, fieldValue, symbol, count = None, None, None, 0  # 初始化变量
     users = loadFileData()
     result = splitString(content, separatorCharacterName=' ')
-    content = removeSpace(result)
-    if content[0].lower() == 'from' and content[2].lower() == 'where':
-        condition = content[content.index('where')+1:]  # ['from', 'staff_tables', 'where', 'staff_id=3']
+    content = deleteEmptyElement(result)
+    if content[0].lower() == 'from' and content[2] in ['where', 'WHERE']:
+        symbolValue = 'WHERE' if content.count('WHERE') == 1 else 'where'
+        condition = content[content.index(symbolValue)+1:]  # ['from', 'staff_tables', 'where', 'staff_id=3']
         if len(condition) == 1:
-            pattern = '(?P<fieldKey>[A-Za-z].*)(?P<symbol>\>|<|=|<=|\>=|like)(?P<fieldValue>\w.*)'
+            pattern = '(?P<fieldKey>\w.*)(?P<symbol>\>|<|=|<=|\>=|like)(?P<fieldValue>\w.*)'
             matchingObject = re.search(pattern, condition[0])  # staff_id=3
             if matchingObject:
                 fieldKey = matchingObject['fieldKey']
