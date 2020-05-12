@@ -108,11 +108,12 @@ def filterFunction(fieldKey, fieldValue, symbol, users):
     :param users: 用户数据
     :return list:
     """
+    fieldKey, fieldValue = fieldKey.strip(), fieldValue.strip('"')  # 初始化变量
     if fieldKey not in tableField:
-        print('table field %s not exists' % fieldKey)
+        print('table field |%s| not exists' % fieldKey)
         return []
     else:
-        fieldValue = fieldValue.strip('"')
+        # fieldValue = fieldValue.strip('"')
         field_symbol_compare = {
             ">": [item for item in users if item[fieldKey] > fieldValue],
             "<": [item for item in users if item[fieldKey] < fieldValue],
@@ -242,8 +243,48 @@ def update(content):
     :param content: 内容
     :return:
     """
+    count, dic = 0, {}  # 初始化变量
     users = loadFileData()
-    print(content)
+    searchSet = 'SET' if content.count('SET') == 1 else 'set'
+    searchWhere = 'WHERE' if content.count('WHERE') == 1 else 'where'
+    split1 = splitString(content, searchSet)  # ['staff_table ', ' age = 25 WHERE  name = "Alex Li"']
+    split2 = deleteEmptyElement(splitString(split1[1], separatorCharacterName=' '))  # ' age = 25 WHERE  name = "Alex Li"'
+    split3 = splitString(' '.join(split2), separatorCharacterName=searchWhere)  # age = 25 WHERE  name = "Alex Li"
+    field, condition = split3
+    pattern = '\s*(?P<fieldKey>\w.*)\s*(?P<symbol>\>|<|=|<=|\>=|like)\s*"?(?P<fieldValue>\w.*)"?.*'
+    # 匹配条件等式
+    matchingObject = re.search(pattern, condition)  # age < 22 | name = "Alex Li"
+    if matchingObject:
+        fieldKey = matchingObject['fieldKey']
+        symbol = matchingObject['symbol']
+        fieldValue = matchingObject['fieldValue']
+        # 筛选数据
+        data = filterFunction(fieldKey, fieldValue, symbol, users)
+        # 解析需要更改的字段和值
+        if ',' in field:
+            field_list = splitString(field, separatorCharacterName=',')
+            for item in field_list:
+                fieldKey, fieldValue = splitString(item, '=')
+                dic[fieldKey.strip()] = fieldValue.strip().strip('"')
+        else:
+            fieldKey, fieldValue = splitString(field, '=')
+            dic[fieldKey.strip()] = fieldValue.strip().strip('"')
+        # 更新数据
+        if len(dic) != 0:
+            userId = [item['staff_id'] for item in data ]
+            for item in users:
+                if item['staff_id'] in userId:
+                    for key in dic:
+                        if item.get(key):
+                            old = item.get(key)
+                            new = dic[key]
+                            if old != new:
+                                item[key] = str(new)
+                                count += 1
+            print('更新受影响的条数: %d' % count)
+            return storageData(users)
+    else:
+        print('matching condition error')
 
 
 def select(content):
