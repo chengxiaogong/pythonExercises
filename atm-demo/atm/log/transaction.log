@@ -1,0 +1,14 @@
+2020-06-21 21:21:22,820 - transaction - INFO - transaction log test1
+2020-06-21 21:26:35,156 - transaction - INFO - transaction log test1
+2020-06-22 00:06:53,000 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:09:51,080 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:12:03,454 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:14:07,909 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:15:53,988 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:17:13,412 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:18:17,907 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:22:54,321 - transaction - INFO - account:cc   action:repay    amount:200.0   interest:0.0
+2020-06-22 00:23:16,201 - transaction - INFO - account:cc   action:withdraw    amount:500.0   interest:25.0
+2020-06-22 00:37:46,489 - transaction - INFO - account:cc   action:repay    amount:100.0   interest:0.0
+2020-06-22 00:38:28,809 - transaction - INFO - account:cc   action:withdraw    amount:100.0   interest:5.0
+2020-06-22 00:39:08,730 - transaction - INFO - account:cc   action:transfer    amount:500.0   interest:25.0
