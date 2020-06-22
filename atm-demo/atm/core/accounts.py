@@ -20,5 +20,10 @@ def load_current_balance(account_id):
 
 
 def dumps_account(account_data):
+    """
+    更新用户数据
+    :param account_data: 用户数据
+    :return:
+    """
     db_api = db_handler.db_handler()
     db_api('update accounts where account=%s' % account_data['id'], account_data=account_data)
