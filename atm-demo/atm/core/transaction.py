@@ -19,6 +19,7 @@ def make_transaction(log_obj, account_data, tran_type, money, **kwargs):
     :param kwargs: 扩展参数
     :return:
     """
+    print(account_data)
     money = float(money)
     transaction_type = settings.TRANSACTION_TYPE
     # 效验交易类型是否在字典中存在

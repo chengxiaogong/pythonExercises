@@ -17,7 +17,8 @@ LOGS_LEVEL = logging.INFO
 # 日志文件名
 LOG_TYPES = {
     'transaction': 'transaction.log',
-    'access': 'access.log'
+    'access': 'access.log',
+    'shopping_mall': 'shopping_mall.log'
 }
 
 # 数据库 配置

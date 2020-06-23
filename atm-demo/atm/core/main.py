@@ -11,7 +11,8 @@ from core import auth
 from core.auth import login_check
 from core import accounts
 from core import transaction
-
+from sys import path as sys_path
+from os import path as os_path
 
 # 交易日志对象
 transaction_log = logger.log_func('transaction')
@@ -162,10 +163,60 @@ def interactive(acc_data):
             flag = True
 
 
+def shopping_mall_all(acc_data):
+    menu = u'''
+    ------- 商城购物 ---------
+    \033[32;1m1.  客户端
+    2.  管理端
+    \033[0m'''
+    print(sys_path)
+    sys_path.append(os_path.dirname(sys_path[-1]))
+    from shopping_mall import shopping_mall
+    menu_dict = {
+        '1': shopping_mall.user_shopping(acc_data),
+        '2': shopping_mall.business()
+    }
+    print(menu)
+    user_option = input("input option: ")
+    if user_option in menu_dict:
+        result = menu_dict[user_option]
+        print(result)
+    else:
+        print('option not exists.')
+
+
+def user_interaction(acc_data):
+    """
+    用户交互中心
+    :param acc_data: 用户数据
+    :return:
+    """
+    menu = u'''
+    ------- 用户交互中心 ---------
+    \033[32;1m1.  ATM终端
+    2.  商城购物
+    \033[0m'''
+    menu_dict = {
+        '1': interactive,
+        '2': shopping_mall_all
+    }
+    flag = False
+    while not flag:
+        print(menu)
+        user_option = input("input option: ")
+        if user_option in menu_dict:
+            menu_dict[user_option](acc_data)
+        elif user_option == 'b':
+            flag = True
+        else:
+            print('option not exists.')
+
+
 def run():
     print(user_data)  # user_data = {'account_id': None,'is_authenticated': False,'account_data': None}
     acc_data = auth.user_login(user_data, access_log)
     if acc_data:
         user_data['account_data'] = acc_data
         print(user_data)
-        interactive(user_data)
+        # interactive(user_data)
+        user_interaction(user_data)
